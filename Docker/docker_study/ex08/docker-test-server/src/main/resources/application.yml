@@ -1,0 +1,26 @@
+server:
+  servlet:
+    encoding:
+      charset: utf-8
+      force: true
+  port: 8080
+spring:
+  datasource:
+    # 꼭 환경변수로 가져와야 읽으면서 DNS로 해석되어 값이 들어옴
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER}
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: true
+
+logging:
+  level:
+    "[com.example.server]": INFO
+    "[org.hibernate.type]": TRACE
