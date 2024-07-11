@@ -203,9 +203,9 @@ CMD [ "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci" 
 
 위와 같이 key-value 형식으로 지정할 수 있다.
 
-![DBTool](./images/DBTool.png)
+도커 파일을 이미지로 만든 후 컨테이너를 실행하여 데이터베이스 툴을 이용하여 해당 MySQL 에 접근하여 환경변수가 제대로 적용 되어있는지 확인한다.
 
-![BASH](./images/BASH.png)
+Bash로도 확인이 가능하다.
 
 MySQL 을 컨테이너로 실행하였을 때 해당 DB의 정보들은 해당 컨테이너의 볼륨에 저장되게 된다.
 
@@ -222,3 +222,124 @@ docker run -d -v <로컬 경로>:/var/lib/mysql -p 3307:3306 --name mysql-contai
 ```sh
 docker run -d -v mysql-volume:/var/lib/mysql -p 3307:3306 --name mysql-container mysql-image
 ```
+
+## docker-compose
+
+docker-compose 는 단일 서버에서 여러 개의 컨테이너를 하나의 서비스로 정의해 컨테이너의 묶음으로 관리할 수 있도록 하는 작업 환경을 제공하는 관리 도구이다.
+
+컨테이너의 수가 많아지고 정의해야 할 옵션이 많아진다면 docker-compose를 사용하는 것이 효율적이다.
+
+주로 `docker-compose.yml` 파일을 사용하여 설정을 정의하게 된다.
+
+### 주요 명령어
+
+- `docker-compose up`: `docker-compose.yml` 파일에 정의된 모든 서비스를 빌드하고 시작한다 `-d` 플래그를 추가하여 백그라운드 모드로 실행할 수 있다.
+- `docker-compose down`: 실행 중인 모든 컨테이너를 중지하고, 네트워크와 볼륨 등도 제거한다.
+
+**docker-compose파일 예시**
+
+```yaml
+version: '3'
+
+services:
+
+  db:
+
+    build:
+
+      context: ./db
+
+      dockerfile: Dockerfile
+
+    ports:
+
+      - 3307:3306
+
+    volumes:
+
+      - ./db/store:/var/lib/mysql
+
+    networks:
+
+      - network
+
+  backend:
+
+    build:
+
+      context: ./product
+
+      dockerfile: Dockerfile
+
+    restart: always
+
+    ports:
+
+      - 8080:8080
+
+    depends_on:
+
+      - db
+
+    environment:
+
+      SPRING_DATASOURCE_URL: 
+
+      SPRING_DATASOURCE_DRIVER: 
+
+      SPRING_DATASOURCE_USERNAME: 
+
+      SPRING_DATASOURCE_PASSWORD: 
+
+    networks:
+
+      - network
+
+  
+
+  frontend:
+
+    build:
+
+      context: ./my-app
+
+      dockerfile: Dockerfile
+
+    restart: always
+
+    ports:
+
+      - 80:80
+
+    depends_on:
+
+      - backend
+
+    networks:
+
+      - network
+
+# 같은 동일 네트워크 내부적으로 DNS 설정이 되어있다 서비스 명으로 서로를 찾을 수 있다.
+
+networks:
+
+  network:
+```
+
+**version** : docker-compose 파일의 버전을 지정한다.
+
+**services** : 각 컨테이너를 정의한다.
+
+**build** : context 경로의 도커파일로 이미지를 빌드하기 위한 설정이다.
+
+**ports** : 호스트의 포트 3307을 컨테이너 포트 3306에 매핑한다. (포트포워딩)
+
+**volume** : 컨테이너가 데이터를 지속적으로 저장할 수 있는 위치를 지정한다.
+
+**network** : networks 설정은 각 서비스가 지정된 네트워크에 연결되어 서로 통신할 수 있도록 한다. 이를 통해 동일 네트워크 내의 서비스들은 DNS 이름(서비스 이름)으로 서로를 찾을 수 있다.
+
+**restart** : restart 설정은 컨테이너가 중단되었을 때 자동으로 재시작할지 여부를 지정한다. 예를 들어, `restart: always`는 컨테이너가 중단될 때마다 항상 재시작하도록 설정한다.
+
+**enviroment** : enviroment 설정은 컨테이너 내에서 사용할 환경 변수를 정의한다.
+
+**depend_on** : 특정 서비스가 다른 서비스보다 먼저 시작되도록 순서를 지정한다. 이를 통하여 서비스간의 의존성을 관리할 수 있다.
