@@ -1,4 +1,4 @@
-FROM node:appine as build
+FROM node:alpine as build
 WORKDIR /app
 COPY package.json /app
 # 라이브러리 설치 노드 모듈이 내부에 생김
@@ -10,4 +10,5 @@ RUN npm run build
 FROM nginx
 # 위에서 build 별칭으로 부터 빌드 된 것을 복사
 COPY --from=build /app/build /usr/share/nginx/html
+COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 ENTRYPOINT [ "nginx", "-g", "daemon off;" ]

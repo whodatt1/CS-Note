@@ -1,0 +1,45 @@
+version: '3'
+services:
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    ports:
+      - 3307:3306
+    volumes:
+      - ./db/store:/var/lib/mysql
+    networks:
+      - network
+  
+  backend:
+    build:
+      context: ./product
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/rootdb?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_DRIVER: com.mysql.cj.jdbc.Driver
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root1234
+    networks:
+      - network
+
+  frontend:
+    build:
+      context: ./my-app
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 80:80
+    depends_on:
+      - backend
+    networks:
+      - network
+      
+# 같은 동일 네트워크 내부적으로 DNS 설정이 되어있다 서비스 명으로 서로를 찾을 수 있다.
+networks:
+  network:
