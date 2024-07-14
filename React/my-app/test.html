@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>깊은 복사 (Deep Copy)</title>
+</head>
+<body>
+    <script>
+        // concat, filter, map, slice, spread(전개 연산자)
+
+        console.log("1.============= 스프레드 연산자");
+        const a = [1,2,3];
+        // const b = a; // 얕은 복사
+        const b = [...a]; // 깊은 복사
+        b.push(4); // 기존 배열에 값을 수정 (추가) 데이터 변경
+
+        console.log(`a의 값은 : ${a}`); // 1,2,3
+        console.log(`b의 값은 : ${b}`); // 1,2,3,4
+
+        // 2. concat (기존 배열에 추가한 후 값 복사)
+        console.log("2.============= 추가하기");
+        const a2 = [1,2,3];
+        const b2 = a2.concat(4);
+
+        console.log(`a2의 값은 : ${a2}`); // 1,2,3
+        console.log(`b2의 값은 : ${b2}`); // 1,2,3,4
+
+        // 응용
+        const c2 = [0, ...a2, 4]; // 앞뒤로 추가가 가능
+        console.log(`c2의 값은 : ${c2}`); // 1,2,3,4
+
+        // 3. filter (보통 삭제할 때 사용한다.)
+        console.log("3.============= 걸러내기");
+
+        const a3 = [1,2,3];
+        const b3 = a3.filter((n) => { return n != 1; }); // boolean을 return 받는다. -> true만 걸러낸다.
+
+        console.log(`b3의 값은 : ${b3}`); // 2,3
+
+        // 4. slice (사이에 값을 유동적으로 추가)
+        console.log("4.============= 잘라내기");
+
+        const a4 = [1,2,3];
+        const b4 = a4.slice(0,2);
+
+        console.log(b4); // [1,2]
+
+        // slice는 배열을 반환해서 그대로 [] 안에 넣어버리면 2차원 배열이 되지만 스프레드 연산자로 뿌려주면 일차원 배열로 유지가 가능하다..
+        const c4 = [...a4.slice(0,2), 4, ...a4.slice(2,3)];
+
+        console.log(c4); // [1,2]
+
+        console.log("5.============= 반복하기");
+        const a5 = [1,2,3];
+
+        for(let i = 0; i<a5.length; i++) {
+            
+        }
+
+    </script>
+</body>
+</html>
