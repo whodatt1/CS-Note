@@ -54,9 +54,42 @@
         console.log("5.============= 반복하기");
         const a5 = [1,2,3];
 
-        for(let i = 0; i<a5.length; i++) {
-            
-        }
+        // JSX 에선 쓸 수 없음 한줄짜리만 가능
+        // for(let i = 0; i < a5.length; i++) {
+        //     console.log(a5[i]);
+        // }
+
+        // forEach는 return이 void라 복사를 못함
+        // a5.forEach((n) => { console.log(n) }); // 리턴 못함.
+
+        // return이 any 순회된 데이터를 리턴할 수 있다.
+        // 스프레드 연산자와 다르게 값 하나하나를 가공할 수 있다.
+        const b5 = a5.map((n) => n + 10); // const bt = [...a5];
+        // or
+        // const b5 = a5.map((n) => {return n});
+        console.log(b5);
+
+        // 수정
+        const data = {phone:"2222"}
+        const a6 = { id:1, name:"김길동", phone:"1111", age:17, gender:"남" };
+        const b6 = { ...a6, data };
+        console.log(b6);
+
+        const users = [
+            {id:1, name:"홍길동", phone:"2222"},
+            {id:2, name:"홍길순", phone:"3333"},
+            {id:3, name:"홍길목", phone:"4444"}
+        ];
+
+        const updateUserDto = {
+            id:2, name:"임꺽정"
+        };
+
+        const newUsers = users.map(u => u.id === updateUserDto.id ? {...u, ...updateUserDto} : u ); // const newUser = {...users};
+        console.log("newUsers", newUsers) 
+
+        // 안됨
+        // users[1].name = updateUserDto.name;
 
     </script>
 </body>

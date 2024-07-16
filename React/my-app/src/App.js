@@ -1,5 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
+import { useState } from 'react';
+import Sub from './Sub';
 
 // 0. React 엔진 - 데이터 변경 감지해서 UI를 그려주는 node.js 서버 위에서 실행된다. 데이터 변경을 감지해야 하기 때문에
 
@@ -28,9 +30,10 @@ const b = 20; // 상수
 function App() {
   let c; // 선언만
   console.log(1, c); // undefined 실제 값 -> 정의되지 않은 변수를 나타냄
+  let list = [1, 2, 3];
 
   // function hello() {
-  //   // var b = 20; // 밖에서 쓸수 있게된다..
+  //   // var b = 20; // 밖에서 쓸수 있게된다.. var 사용 자제
   //   let b = 20;
   // }
 
@@ -40,12 +43,18 @@ function App() {
   };
 
   // return의 괄호 한줄이면 괄호가 필요없지만 여러줄이면 괄호가 생긴다.
+  // 랜더링 시점 = 상태값 변경 (전체가 다시그려짐)
   return (
     <div>
       <div style={mystyle}>
         안녕 {a === 10 ? '10입니다.' : '10이 아닙니다.'}
       </div>
       <h1 className="box-style">해딩태그 {b === 20 && '20입니다.'}</h1>
+      <div>
+        {list.map((n) => (
+          <h1>{n}</h1>
+        ))}
+      </div>
       <hr />
     </div>
   );
