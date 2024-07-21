@@ -1,0 +1,13 @@
+.container {
+  height: 700;
+  border: 2px solid black;
+}
+
+.sub-container {
+  height: 250;
+  border: 2px solid black;
+}
+
+div {
+  padding: 10px;
+}
