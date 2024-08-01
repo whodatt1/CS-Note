@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,7 +137,5 @@ class SpringJpaApplicationTests {
 		existsUser.setGender(newGender);
 		existsUser.setDelYn(newDelYn);
 		existsUser.setModDt(LocalDateTime.now());
-		
-		userRepository.save(existsUser);
 	}
 }
