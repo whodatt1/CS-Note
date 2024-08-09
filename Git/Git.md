@@ -124,7 +124,9 @@ git init 으로 인한 작업 영역에 회원 가입 add 후에 commit을 하�
 
 이 때 실제로 병합된 것이 아닌 포인터만 이동하였다고 하여 이것을 `fast-forward merge`라고 한다. 
 
-만약 main branch 쪽에서 글쓰기를 따로 개발하여 commit 한다고 한다면 이때는 새로운 가지가 생기고 글쓰기 쪽으로 main branch pointer가 이동하게 된다. 이 경우 main branch pointer를 아이디 중복 체크 쪽으로 이동 시켜버린다면, 글쓰기 부분이 날라가게 된다. 이때 `3-way merge`를 하는데 수행하면 글쓰기로 인한 가지 쪽으로 아이디 중복 완료 점을 추가되며 main branch pointer가 이 부분으로 이동하게 된다. topic branch pointer는 변동이 없다.
+만약 main branch 쪽으로 이동하여 글쓰기를 따로 개발하여 commit 한다고 한다면 이때는 새로운 가지가 생기고 글쓰기 쪽으로 main branch pointer가 이동하게 된다. 이 경우 main branch pointer를 아이디 중복 체크 쪽으로 이동 시켜버린다면, 글쓰기 부분이 날라가게 된다. 이때 `3-way merge`를 하는데 수행하면 글쓰기로 인한 가지 쪽으로 아이디 중복 완료 점이 추가되며 main branch pointer가 이 부분으로 이동하게 된다. topic branch pointer는 변동이 없다.
+
+위의 로그인부터 파생이 되었기 때문에 로그인은 부모가 되며 글쓰기와 아이디 중복 체크는 자식이 된다. 세 개의 점을 merge 하게 되므로 이 것을 `3-way merge`라고 한다.
 
 ### Ex05(Fast-forward)
 
@@ -274,6 +276,9 @@ git push --delete origin join_topic -> git checkout dev -> git pull origin dev /
 
 main과 dev의 push는 A밖에 하지 못함. 만약 B라고 push 하려고 하면 거절당한다. B 입장에서 올리기 위해선 main과 dev를 동일하게 들고 있는다. 이후 topic branch를 만들어서 push를 하여 pull request 요청을 하여야 한다.
 
+> draft
+> 초안이라는 것 완료 되지 않았는데 코드 리뷰를 요청할 경우 즉, 중간 보고
+
 ### blog-team(팀) 실습 거절
 
 **B시작**
@@ -288,7 +293,42 @@ pull request 반려
 **A시작**
 프로젝트가 완료가 되었으니 dev 를 pull -> main에서 dev를 merge -> git tag blog1.0.0 -> git push --tags origin main (태그까지 포함해서 push)
 
-## 대규모 협업하기 실습
-
 **merge 순서 이해하기**
 
+**시나리오 1**
+
+환경설정.txt 생성 -> git add . -> git commit -m "환경설정" -> 토픽 생성 git checkout -b topic/login -> 로그인.txt 생성 -> git add . -> git commit -m "로그인" -> 동시에 개발하고 있다는 가정을 하기 위해 master branch로 돌아와 master branch 기준 토픽 생성 git checkout -b topic/join -> 회원가입.txt 생성 -> git add . -> git commit -m "회원가입" -> 회원가입이 먼저 끝났다고 가정하여 merge를 한다. git merge --no-ff topic/join -> 이후 로그인을 동일하게 merge -> 이떄 로그가 회원가입 => 로그인 순이 아닌 커밋된 시점인 로그인 => 회원가입 순으로 로그가 찍힌다.
+
+merge의 history 순서는 각 topic에서 커밋이 된 시점의 영향을 받는다.
+
+커밋을 영향을 받지 않게 merge가 되게 하려면? 즉, merge 순으로 로그가 찍히게 하려면 rebase를 사용하여야 한다.
+
+**시나리오 2**
+
+환경설정.txt 생성 -> git add . -> git commit -m "환경설정" -> 토픽 생성 git checkout -b topic/login -> 로그인.txt 생성 -> git add . -> git commit -m "로그인" -> 동시에 개발하고 있다는 가정을 하기 위해 master branch로 돌아와 master branch 기준 토픽 생성 git checkout -b topic/join -> 회원가입.txt 생성 -> git add . -> git commit -m "회원가입" -> 회원가입이 먼저 끝났다고 가정하여 merge를 한다. git merge --no-ff topic/join -> git checkout topic/login -> git rebase master -> git checkout master -> git merge --no-ff topic/login
+
+리베이스를 하게되면 기준 브런치 (master) 의 최신 커밋 위로 재배치되게 된다.
+
+## 대규모 협업하기 실습
+
+**홍팀장**
+
+lol-git-prac 레파지토리 생성 (README.md 포함) -> git clone `레파지토리 주소` -> lol-git-prac 이동 -> README.md 수정 -> 환경설정.txt 생성 후 add/commit -> git checkout -b dev -> git push --all -> 김대리와 최사원은 레파지토리 콜라보 추가 -> add rule 추가 -> 아무무 PR 확인 후 승인 dev 브런치로 merge -> 야스오 PR 확인 후 릴리즈 1.0 버전을 위해 승인하지 않고 comment 만 남김 -> 누누 PR 확인 후 승인 dev 브런치로 merge -> dev 브런치 동기화 (git pull origin dev) -> dev기준 release-1.0 브런치 생성 (git checkout -b release-1.0) -> 릴리즈 브런치 push (git push origin release-1.0) -> QA 진행중 이와 동시에 dev 브랜치에 야스오 PR 요청 온것을 거절하고 rebase 요청 merge시 커밋 순서가 꼬이기 때문에.. -> rebase 되어 다시 push 된 것을 확인 후 merge 승인 처리 -> release 1.0 main에서 merge 받음 -> 메인 쪽에서 git tag 1.0 -> git push --tags origin main 
+
+김대리와 최사원이 동시 개발한다고 가정
+
+**김대리**
+
+git clone `레파지토리 주소` -> lol-git-prac 이동 -> git checkout -b dev origin/dev -> 개발 브런치 생성 git checkout -b feature/amumu -> 아무무.txt 생성 후 add/commit (개발완료) -> git push origin feature/amumu 로 PR 요청 -> 야스오 작업 시작 -> git checkout dev -> git pull origin dev -> git checkout -b feature/yasuo -> 야스오.txt 생성 후 add/commit (개발완료) -> git push origin feature/yasuo -> PR 요청 -> 승인 대기 -> rebase 하라고 거절된 것 확인 -> git checkout dev -> git pull origin dev -> git checkout feature/yasuo -> git rebase dev -> git push -f origin feature/yasuo (강제 푸쉬)
+
+**최사원**
+
+김대리보다 개발속도가 늦다고 가정
+
+git clone `레파지토리 주소` -> lol-git-prac 이동 -> git checkout -b dev origin/dev -> 개발 브런치 생성 git checkout -b feature/nunu -> 누누10프로.txt 생성 (개발진행중) -> 누누100프로.txt 생성 후 add/commit -> git checkout dev -> git pull origin dev -> git checkout feature/nunu -> git rebase dev (머지 순서 맞추기) -> git push origin feature/nunu -> PR 요청
+
+## fork
+
+clone 받은 건 origin 원본은 upstream이라고 한다.
+
+해당 레파지토리 fork -> git clone `레파지토리 주소` -> 내용 수정 -> git add . -> gi commit -m "내용 변경" -> git push origin master -> contribute -> PR 요청
