@@ -1,10 +1,18 @@
 package com.example.react.web;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,8 +25,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.react.domain.Book;
+import com.example.react.domain.BookRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -40,6 +50,18 @@ public class BookControllerIntegreTest {
 	@Autowired
 	private MockMvc mockMvc;
 	
+	@Autowired
+	private BookRepository bookRepository;
+	
+	@Autowired
+	private EntityManager entityManager; // jpa는 이것의 구현체
+	
+	@BeforeEach // 모든 테스트 함수가 실행되기 전에 실행
+	public void init() {
+		// AUTO_INCREMENT를 1로 초기화
+		entityManager.createNativeQuery("ALTER TABLE book AUTO_INCREMENT = 1").executeUpdate();
+	}
+	
 	// BDDMockito 패턴 given, when, then
 	@Test
 	public void save_테스트() throws Exception {
@@ -59,5 +81,80 @@ public class BookControllerIntegreTest {
 			.andExpect(jsonPath("$.title").value("스프링 따라하기"))
 			.andDo(MockMvcResultHandlers.print());
 			
+	}
+	
+	@Test
+	public void findAll_테스트() throws Exception {
+		// given
+		List<Book> books = new ArrayList<>();
+		books.add(new Book(null, "스프링 부트", "코스"));
+		books.add(new Book(null, "리액트", "코스"));
+		books.add(new Book(null, "JUNIT5", "코스"));
+		
+		bookRepository.saveAll(books);
+		
+		// when
+		ResultActions resultActions = mockMvc.perform(get("/book")
+				.accept(MediaType.APPLICATION_JSON_VALUE));
+		
+		// then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.[0].id").value(1L))
+			.andExpect(jsonPath("$", Matchers.hasSize(3)))
+			.andExpect(jsonPath("$.[2].title").value("JUNIT5"))
+			.andDo(MockMvcResultHandlers.print());
+	}
+	
+	@Test
+	public void findById_테스트() throws Exception {
+		// given
+		Long id = 1L;
+		
+		List<Book> books = new ArrayList<>();
+		books.add(new Book(null, "스프링 부트", "코스"));
+		books.add(new Book(null, "리액트", "코스"));
+		books.add(new Book(null, "JUNIT5", "코스"));
+		
+		bookRepository.saveAll(books);
+		
+		// when
+		ResultActions resultActions = mockMvc.perform(get("/book/{id}", id)
+				.accept(MediaType.APPLICATION_JSON_VALUE));
+		
+		// then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.title").value("스프링 부트"))
+			.andDo(MockMvcResultHandlers.print());
+	}
+	
+	@Test
+	public void update_테스트() throws Exception {
+		// given
+		Long id = 1L;
+		
+		List<Book> books = new ArrayList<>();
+		books.add(new Book(null, "스프링 부트", "코스"));
+		books.add(new Book(null, "리액트", "코스"));
+		books.add(new Book(null, "JUNIT5", "코스"));
+		
+		bookRepository.saveAll(books);
+		
+		Book book = new Book(null, "C++ 따라하기", "코스");
+		String content = new ObjectMapper().writeValueAsString(book);
+		
+		// when (테스트 실행)
+		ResultActions resultActions = mockMvc.perform(put("/book/{id}", id)
+			   .contentType(MediaType.APPLICATION_JSON_VALUE) // 요청
+			   .content(content) // 내용
+			   .accept(MediaType.APPLICATION_JSON_VALUE)); // 응답
+		
+		// then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.id").value(1L))
+			.andExpect(jsonPath("$.title").value("C++ 따라하기"))
+			.andDo(MockMvcResultHandlers.print());
 	}
 }
