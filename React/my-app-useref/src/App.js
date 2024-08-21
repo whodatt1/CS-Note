@@ -1,3 +1,6 @@
+// useRef(디자인)
+// dom을 변경할 때 사
+
 import logo from "./logo.svg";
 import "./App.css";
 import { createRef, useRef, useState } from "react";
@@ -10,7 +13,8 @@ function App() {
     { id: 2, name: "꺽정" },
   ]);
 
-  const myRefs = Array.from({ length: list.length }).map(() => createRef());
+  // 배열로 만들어서 사용
+  const myRefs = Array.from({ length: list.length }).map(() => createRef()); // 동적으로 레퍼런스 생성
   return (
     <div>
       <button
