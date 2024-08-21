@@ -28,7 +28,7 @@ const Header = () => {
               글쓰기
             </Link>
           </Nav>
-          <Form inline>
+          <Form>
             <FormControl type="test" placeholder="Search" className="mr-sm-2" />
             <Button variant="outline-info">Search</Button>
           </Form>

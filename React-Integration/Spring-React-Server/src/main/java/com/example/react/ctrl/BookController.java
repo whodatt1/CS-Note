@@ -2,6 +2,7 @@ package com.example.react.ctrl;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,7 @@ public class BookController {
 		return new ResponseEntity<>(bookService.save(book), HttpStatus.CREATED); // 200
 	}
 	
+	@CrossOrigin // 외부 자바스크립트 요청 허용
 	@GetMapping("/book")
 	public ResponseEntity<?> findAll() {
 		return new ResponseEntity<>(bookService.findAll(), HttpStatus.OK); // 200
