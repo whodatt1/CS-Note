@@ -22,11 +22,12 @@ public class BookController {
 	
 	private final BookService bookService;
 	
+	@CrossOrigin // 외부 자바스크립트 요청 허용
 	@PostMapping("/book")
 	// 파라미터 @RequestBody => raw => JSON 형식
 	// 안붙으면 x-www-form-urlencoded 방식의 MIME TYPE
 	public ResponseEntity<?> save(@RequestBody Book book) {
-		return new ResponseEntity<>(bookService.save(book), HttpStatus.CREATED); // 200
+		return new ResponseEntity<>(bookService.save(book), HttpStatus.CREATED); // 201
 	}
 	
 	@CrossOrigin // 외부 자바스크립트 요청 허용
