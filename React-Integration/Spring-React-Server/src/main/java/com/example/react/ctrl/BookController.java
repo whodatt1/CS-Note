@@ -22,7 +22,8 @@ public class BookController {
 	
 	private final BookService bookService;
 	
-	@CrossOrigin // 외부 자바스크립트 요청 허용
+	// security (라이브러리 적용) - CORS 정책을 가지고 있다. (시큐리티가 CORS를 해제)
+	@CrossOrigin // 외부 자바스크립트 요청 허용 컨트롤러 진입 직전 동작
 	@PostMapping("/book")
 	// 파라미터 @RequestBody => raw => JSON 형식
 	// 안붙으면 x-www-form-urlencoded 방식의 MIME TYPE
@@ -36,16 +37,19 @@ public class BookController {
 		return new ResponseEntity<>(bookService.findAll(), HttpStatus.OK); // 200
 	}
 	
+	@CrossOrigin // 외부 자바스크립트 요청 허용
 	@GetMapping("/book/{id}")
 	public ResponseEntity<?> findById(@PathVariable("id") Long id) {
 		return new ResponseEntity<>(bookService.getOne(id), HttpStatus.OK); // 200
 	}
 	
+	@CrossOrigin // 외부 자바스크립트 요청 허용
 	@PutMapping("/book/{id}")
 	public ResponseEntity<?> update(@PathVariable("id") Long id, @RequestBody Book book) {
 		return new ResponseEntity<>(bookService.update(id, book), HttpStatus.OK); // 200
 	}
 	
+	@CrossOrigin // 외부 자바스크립트 요청 허용
 	@DeleteMapping("/book/{id}")
 	public ResponseEntity<?> deleteById(@PathVariable("id") Long id) {
 		return new ResponseEntity<>(bookService.delete(id), HttpStatus.OK); // 200
