@@ -4,14 +4,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.example.security1.config.auth.PrincipalDetails;
 import com.example.security1.model.User;
 import com.example.security1.repo.UserRepository;
+
+// 스프링 시큐리티는 자기만의 시큐리티 세션을 들고있다.
+// 원래 기존 session 영역이 있다.
+// 여기에 시큐리티가 관리하는 session이 따로 있다.
+// 시큐리티가 관리하는 session에 들어갈 수 있는 타입은
+// Authentication 객체밖에 없다. 들어가는 순간 로그인이 되는 것
+// 필요할때마다 Controller에서 DI 해서 사용할 수 있다.
+// 여기에 들어갈 수 있는 두개의 타입이 있는데
+// 1. UserDetails 2. OAuth2User
 
 @Controller // View를 리턴
 public class IndexController {
@@ -21,6 +34,32 @@ public class IndexController {
 	
 	@Autowired
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
+	
+	// OAuth2 로그인 후 테스트시 캐스팅 오류가 난다..
+	@GetMapping("/test/login")
+	public @ResponseBody String loginTest(Authentication authentication,
+			// 세션 정보에 접근
+			@AuthenticationPrincipal PrincipalDetails userDetails) { // DI(의존성 주입) 시큐리티는 세션영역에 시큐리티 컨텍스트에 세션 정보를 Authentication 객체로 저장
+		System.out.println("/test/login =================");
+		// Authentication을 다운캐스팅
+		PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+		System.out.println("authentication : " + principalDetails.getUser());
+		
+		System.out.println("userDetails : " + userDetails.getUser());
+		return "세션 정보 확인하기";
+	}
+	
+	@GetMapping("/test/oauth/login")
+	public @ResponseBody String testOAuthLogin(Authentication authentication,
+			@AuthenticationPrincipal OAuth2User oauth) { // DI(의존성 주입) 시큐리티는 세션영역에 시큐리티 컨텍스트에 세션 정보를 Authentication 객체로 저장
+		System.out.println("/test/login =================");
+		// Authentication을 다운캐스팅이 안됨 OAuth2User로 받아야한다
+		OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+		System.out.println("authentication : " + oAuth2User.getAttributes());
+		System.out.println("oauth2User : " + oauth.getAttributes());
+		
+		return "OAuth 세션 정보 확인하기";
+	}
 	
 	// localhost:8080/
 	// localhost:8080
@@ -32,7 +71,11 @@ public class IndexController {
 	}
 	
 	@GetMapping("/user")
-	public @ResponseBody String user() {
+	public @ResponseBody String user(
+			// OAuth 일지 아닐지 판단 불가 그래서 하나로 묶어서 implement 받은 객체를 생성하여 사용
+			// OAuth 도 PrincipalDetails 타입으로 묶어서 사용
+			@AuthenticationPrincipal PrincipalDetails principalDetails
+			) {
 		return "user";
 	}
 	
