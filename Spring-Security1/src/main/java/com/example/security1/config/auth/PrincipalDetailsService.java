@@ -18,11 +18,13 @@ public class PrincipalDetailsService implements UserDetailsService {
 	private UserRepository userRepository;
 	
 	// 시큐리티 session(리턴 시 내부 Authentication(내부 UserDetail)) 
+	// 함수 종료시 @AuthenticationPrincipal 어노테이션이 만들어진다.
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		System.out.println("username : " + username);
 		User userEntity = userRepository.findByUsername(username);
 		if (userEntity != null) {
+			// Authentication 객체 안에 들어감
 			return new PrincipalDetails(userEntity);
 		}
 		return null;

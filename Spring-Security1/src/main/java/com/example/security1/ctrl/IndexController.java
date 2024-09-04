@@ -70,12 +70,16 @@ public class IndexController {
 		return "index"; // src/main/resources/templates/index.mustache
 	}
 	
+	// OAuth 로그인을 해도 PrincipalDetails
+	// 일반 로그인을 해도 PrincipalDetails
 	@GetMapping("/user")
 	public @ResponseBody String user(
 			// OAuth 일지 아닐지 판단 불가 그래서 하나로 묶어서 implement 받은 객체를 생성하여 사용
 			// OAuth 도 PrincipalDetails 타입으로 묶어서 사용
 			@AuthenticationPrincipal PrincipalDetails principalDetails
 			) {
+		
+		System.out.println("principalDetails : " + principalDetails.getUser());
 		return "user";
 	}
 	
