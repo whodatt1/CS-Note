@@ -24,7 +24,7 @@ public class NaverUserInfo implements OAuth2UserInfo {
 	public String getEmail() {
 		return (String) attributes.get("email");
 	}
-
+	
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
