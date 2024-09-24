@@ -1,7 +1,9 @@
 package com.example.jwt.jwt;
 
-import java.io.BufferedReader;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -9,6 +11,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.example.jwt.auth.PrincipalDetails;
 import com.example.jwt.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -78,6 +82,17 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 			Authentication authResult) throws IOException, ServletException {
 		System.out.println("successfulAuthentication 실행됨 : 인증 완료");
-		super.successfulAuthentication(request, response, chain, authResult);
+		PrincipalDetails principalDetails = (PrincipalDetails) authResult.getPrincipal();
+		
+		// RSA 방식이 아닌 Hash 암호방식
+		// HMAC512 의 특징은 시크릿 키 값을 가지고 있다.
+		String jwtToken = JWT.create()
+				.withSubject("kim토큰")
+				.withExpiresAt(Date.from(Instant.now().plus(30, ChronoUnit.MINUTES)))
+				.withClaim("id", principalDetails.getUser().getId())
+				.withClaim("username", principalDetails.getUser().getUsername())
+				.sign(Algorithm.HMAC512("kim"));
+		
+		response.addHeader("Authorization", "Bearer " + jwtToken);
 	}
 }
