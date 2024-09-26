@@ -2,6 +2,8 @@ package com.example.jwt.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,11 +13,11 @@ import org.springframework.security.config.annotation.web.configurers.HttpBasicC
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.web.filter.CorsFilter;
 
-import com.example.jwt.filter.MyFilter3;
 import com.example.jwt.jwt.JwtAuthenticationFilter;
+import com.example.jwt.jwt.JwtAuthorizationFilter;
+import com.example.jwt.repo.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 	
 	private final CorsFilter corsFilter;
+	private final UserRepository userRepository;
 	
 	@Bean
 	BCryptPasswordEncoder encodePwd() {
@@ -38,7 +41,7 @@ public class SecurityConfig {
 	
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
-		http.addFilterBefore(new MyFilter3(), SecurityContextHolderFilter.class);
+		// http.addFilterBefore(new MyFilter3(), SecurityContextHolderFilter.class);
 		http.csrf(AbstractHttpConfigurer::disable)
 			.sessionManagement((sessionManagement) ->
 				sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -47,6 +50,7 @@ public class SecurityConfig {
 			.formLogin(form -> form.disable())		 // 폼 로그인 방식 사용 x
 			.httpBasic(HttpBasicConfigurer::disable) // http 로그인 방식 사용 x
 			.addFilter(new JwtAuthenticationFilter(authenticationManager)) // AuthenticationManager를 던져줘야 함
+			.addFilter(new JwtAuthorizationFilter(authenticationManager, userRepository))
 			.authorizeHttpRequests((authz) -> authz
 									.requestMatchers("/api/v1/user/**")
 									.hasAnyRole("USER", "MANAGER", "ADMIN")

@@ -88,11 +88,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		// HMAC512 의 특징은 시크릿 키 값을 가지고 있다.
 		String jwtToken = JWT.create()
 				.withSubject("kim토큰")
-				.withExpiresAt(Date.from(Instant.now().plus(30, ChronoUnit.MINUTES)))
+				.withExpiresAt(Date.from(Instant.now().plus(JwtProperties.EXPIRATION_TIME, ChronoUnit.MINUTES)))
 				.withClaim("id", principalDetails.getUser().getId())
 				.withClaim("username", principalDetails.getUser().getUsername())
-				.sign(Algorithm.HMAC512("kim"));
+				.sign(Algorithm.HMAC512(JwtProperties.SECRET));
 		
-		response.addHeader("Authorization", "Bearer " + jwtToken);
+		response.addHeader(JwtProperties.HEADER_STRING , JwtProperties.TOKEN_PREFIX + jwtToken);
 	}
 }
